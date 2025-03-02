@@ -4,12 +4,14 @@ import cookieParser from "cookie-parser";
 import apiKeyRouter from "./routes/ApiKey.routes.js"
 import eventRouter from "./routes/Event.routes.js"
 import helmet from "helmet";
+import { globalApiRateLimit } from "./config/rateLimiting.js";
 const app=express()
 dotenv.config({})
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(helmet())
+app.use(globalApiRateLimit)
 app.use("/api/auth",apiKeyRouter)
 app.use("/api/analytics",eventRouter)
 const server=app.listen(8000,()=>{

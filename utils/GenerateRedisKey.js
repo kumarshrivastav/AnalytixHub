@@ -12,7 +12,6 @@ export default function GenerateRedisKey(req) {
             const updatedQuery = Object.keys(query).map((q) => `${q}=${query[q]}`).join(":")
             updateBaseUrl = updateBaseUrl + ":" + updatedQuery
         }
-        console.log(updateBaseUrl)
         return updateBaseUrl
     } catch (error) {
         throw error
