@@ -2,6 +2,9 @@ import { validationResult } from "express-validator"
 import ErrorHandler from "../utils/ErrorHandle.js"
 import crypto from "crypto"
 import prisma from "../DB/db.config.js"
+import GenerateRedisKey from "../utils/GenerateRedisKey.js"
+import RedisClient from "../config/redis.config.js"
+import { RevokeApiKeyRoutesRedis } from "../utils/RevokeRedisKey.js"
 
 class ApiKeyController {
     async Register(req, res, next) {
@@ -18,13 +21,18 @@ class ApiKeyController {
             const apiKey = crypto.randomBytes(128).toString("hex")
             const newApp = await prisma.apiKey.create({ data: { appName, key: apiKey } })
             res.set('x-api-key',apiKey)
+            await RevokeApiKeyRoutesRedis()
             return res.status(201).send({ message: "New Api-Key Created", NewApp: newApp })
         } catch (error) {
             next(error)
         }
     }
     async ApiKey(req, res, next) {
-        console.log(req.headers)
+        const redisKey=GenerateRedisKey(req)
+        const data=await RedisClient.get(redisKey)
+        if(data){
+            return res.status(200).send(JSON.parse(data))
+        }
         const { appName } = req.query
         if (!appName) {
             return next(ErrorHandler(400, "Please pass the Api-key of your app"))
@@ -34,7 +42,9 @@ class ApiKeyController {
             if (!app) {
                 return next(ErrorHandler(400, `App is not present with name - ${appName}`))
             }
-            return res.status(200).send({ AppName: appName, ApiKey: app.key })
+            const responseData={ AppName: appName, ApiKey: app.key }
+            await RedisClient.set(redisKey,JSON.stringify(responseData))
+            return res.status(200).send(responseData)
         } catch (error) {
 
         }
@@ -52,6 +62,7 @@ class ApiKeyController {
                 return next(ErrorHandler(400, `App not present with this name - ${appName}`))
             }
             const apiKeyRevoked = await prisma.apiKey.update({ where: { appName }, data: { revoked: true } })
+            await RevokeApiKeyRoutesRedis()
             return res.status(201).send({ message: `Api-Key has been revoked for this app - ${apiKeyRevoked.appName}` })
         } catch (error) {
             next(error)
