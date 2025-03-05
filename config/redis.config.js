@@ -13,5 +13,12 @@ const ConnectRedis=async()=>{
     }
 }
 
-const RedisClient=await ConnectRedis()
+let RedisClient
+(async ()=>{
+    RedisClient=await ConnectRedis()
+})()
+
+export const closeRedis=async()=>{
+    await RedisClient.quit()
+}
 export default RedisClient

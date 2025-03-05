@@ -15,27 +15,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(helmet())
 app.use(globalApiRateLimit)
-// const swaggerDefinition={
-//     openapi:'3.0.0',
-//     info:{
-//         title:"analytixHub",
-//         version:'1.0.0',
-//         description:'analytixHub description'
-//     },
-//     servers:[
-//         {
-//             url:"http://localhost:8000",
-//             description:"Development Server"
-//         }
-//     ]
-// }
-
-// const options={definition:swaggerDefinition,apis:['./index.js']}
-// const swaggerSpec=swaggerJSDoc(options)
-// app.use('/api-docs',swaggerUi.serve,swaggerUi.setup(swaggerSpec))
-
 setupSwagger(app)
-
 app.use("/api/auth",apiKeyRouter)
 app.use("/api/analytics",eventRouter)
 const server=app.listen(8000,()=>{
@@ -46,5 +26,4 @@ app.use((err,req,res,next)=>{
     const statusCode=err.statusCode || 500
     const message=err.message || "Internal Server Error"
     res.status(statusCode).send({success:false,message})
-    next()
 })
