@@ -2,7 +2,6 @@ services:
   backend:
     image: shrivastavankit/analytixhub-backend:latest
     build:
-      context: contextPath
       dockerfile: Dockerfile
     ports:
       - "${PORT}:${PORT}"
