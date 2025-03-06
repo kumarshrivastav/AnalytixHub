@@ -35,7 +35,7 @@ class ApiKeyController {
         }
         const { appName } = req.query
         if (!appName) {
-            return next(ErrorHandler(400, "Please pass the Api-key of your app"))
+            return next(ErrorHandler(400, "Please pass the App Name in Query"))
         }
         try {
             const app = await prisma.apiKey.findUnique({ where: { appName } })
