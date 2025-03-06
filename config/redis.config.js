@@ -1,5 +1,7 @@
 import {createClient} from "redis"
-
+import dotenv from "dotenv"
+dotenv.config({})
+console.log(process.env.REDIS_URL)
 const ConnectRedis=async()=>{
     try {
         const redisClient=createClient({url:process.env.REDIS_URL})
@@ -13,10 +15,7 @@ const ConnectRedis=async()=>{
     }
 }
 
-let RedisClient
-(async ()=>{
-    RedisClient=await ConnectRedis()
-})()
+let RedisClient=await ConnectRedis()
 
 export const closeRedis=async()=>{
     await RedisClient.quit()
